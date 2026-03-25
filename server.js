@@ -13,7 +13,7 @@ app.use(cors());
 // ====== КОНФІГ ======
 const MERCHANT_ACCOUNT = '1millionclub_net';
 const MERCHANT_SECRET = '55086e0511f26650f003b2a71574c9ab496cfaca';
-const MERCHANT_DOMAIN = 'your-donate-page.com'; // ← домен де буде donate.html
+const MERCHANT_DOMAIN = 'stebdash.github.io'; // ← домен де буде donate.html
 // ====================
 
 // SSE клієнти (OBS підключається сюди)
