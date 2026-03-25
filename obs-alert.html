@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: transparent;
+    width: 600px;
+    height: 200px;
+    overflow: hidden;
+    font-family: 'Unbounded', sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Mulish:wght@500;600&display=swap');
+
+  .alert {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, rgba(13,13,20,0.96), rgba(22,22,31,0.96));
+    border: 1px solid rgba(162,89,255,0.5);
+    border-radius: 20px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 40px rgba(162,89,255,0.3),
+      0 8px 32px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    transform: translateY(120px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  }
+
+  .alert.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .alert.hide {
+    transform: translateY(120px);
+    opacity: 0;
+    transition: transform 0.4s ease-in, opacity 0.3s ease;
+  }
+
+  .icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #a259ff, #ff6bff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(162,89,255,0.5);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(162,89,255,0.5); }
+    50% { box-shadow: 0 0 32px rgba(162,89,255,0.8); }
+  }
+
+  .content { flex: 1; min-width: 0; }
+
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .donor-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .amount {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a259ff, #ff6bff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: nowrap;
+    margin-left: 12px;
+  }
+
+  .message {
+    font-family: 'Mulish', sans-serif;
+    font-size: 13px;
+    color: rgba(240,240,255,0.65);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Progress bar */
+  .progress {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #a259ff, #ff6bff);
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  .progress-bar.run {
+    animation: shrink linear forwards;
+  }
+
+  @keyframes shrink {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="alert" id="alert">
+  <div class="icon">💜</div>
+  <div class="content">
+    <div class="top-row">
+      <span class="donor-name" id="name">Анонім</span>
+      <span class="amount" id="amount">₴100</span>
+    </div>
+    <div class="message" id="message">Дякую за стрім!</div>
+  </div>
+</div>
+
+<script>
+  const SERVER_URL = 'https://YOUR-SERVER.railway.app'; // ← замінити після деплою
+  const DISPLAY_SECONDS = 7;
+
+  let queue = [];
+  let isShowing = false;
+
+  function showAlert(data) {
+    queue.push(data);
+    if (!isShowing) processQueue();
+  }
+
+  function processQueue() {
+    if (queue.length === 0) { isShowing = false; return; }
+    isShowing = true;
+    const data = queue.shift();
+
+    document.getElementById('name').textContent = data.name || 'Анонім';
+    document.getElementById('amount').textContent = `₴${data.amount}`;
+    document.getElementById('message').textContent = data.message || '💜';
+
+    const alert = document.getElementById('alert');
+    alert.classList.remove('hide');
+    alert.classList.add('show');
+
+    setTimeout(() => {
+      alert.classList.remove('show');
+      alert.classList.add('hide');
+      setTimeout(processQueue, 500);
+    }, DISPLAY_SECONDS * 1000);
+  }
+
+  // Підключення до сервера через SSE (Server-Sent Events)
+  function connect() {
+    const es = new EventSource(`${SERVER_URL}/events`);
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === 'donation') showAlert(data);
+      } catch(err) {}
+    };
+    es.onerror = () => {
+      es.close();
+      setTimeout(connect, 3000); // реконнект через 3 сек
+    };
+  }
+
+  connect();
+</script>
+</body>
+</html>
