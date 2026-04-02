@@ -1,234 +1,218 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
 <meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ВАЖЛИВО: прозорий фон для OBS */
-  body {
-    background: transparent !important;
-    width: 600px;
-    height: 160px;
-    overflow: hidden;
-    font-family: sans-serif;
-  }
+body {
+  background: transparent;
+  width: 600px;
+  height: 160px;
+  overflow: hidden;
+}
 
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@700&family=Mulish:wght@500;600&display=swap');
+#alert {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: rgba(8, 8, 20, 0.95);
+  border: 2px solid #2039D4;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transform: translateY(200px);
+  opacity: 0;
+}
 
-  .alert {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-    background: linear-gradient(135deg, rgba(10,10,18,0.97), rgba(20,20,32,0.97));
-    border: 1px solid rgba(32,57,212,0.6);
-    border-radius: 16px;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow:
-      0 0 32px rgba(32,57,212,0.25),
-      0 8px 24px rgba(0,0,0,0.7);
+#alert.show {
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
 
-    /* початковий стан — прихований */
-    transform: translateY(120px);
-    opacity: 0;
-    transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.35s ease;
-  }
+#alert.hide {
+  animation: slideOut 0.4s ease-in forwards;
+}
 
-  .alert.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
+@keyframes slideIn {
+  to { transform: translateY(0); opacity: 1; }
+}
 
-  .alert.hide {
-    transform: translateY(120px);
-    opacity: 0;
-    transition: transform 0.4s ease-in, opacity 0.3s ease;
-  }
+@keyframes slideOut {
+  to { transform: translateY(200px); opacity: 0; }
+}
 
-  /* Ліва синя смужка */
-  .alert::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 12px; bottom: 12px;
-    width: 3px;
-    background: linear-gradient(180deg, #2039D4, #F5A800);
-    border-radius: 0 2px 2px 0;
-  }
+.icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2039D4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
 
-  .icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2039D4, #1530b0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-    box-shadow: 0 0 16px rgba(32,57,212,0.5);
-  }
+.content { flex: 1; min-width: 0; }
 
-  .content { flex: 1; min-width: 0; }
+.row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
 
-  .top-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 3px;
-  }
+#donorName {
+  font-family: 'Oswald', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
 
-  .donor-name {
-    font-family: 'Oswald', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
+#donorAmount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: #F5A800;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
 
-  .amount {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: #F5A800;
-    white-space: nowrap;
-    margin-left: 10px;
-    letter-spacing: 0.05em;
-  }
+#donorMessage {
+  font-family: sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  .message {
-    font-family: 'Mulish', sans-serif;
-    font-size: 13px;
-    color: rgba(255,255,255,0.55);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.progressbar {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
 
-  /* Прогрес-бар */
-  .progress {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 0 0 16px 16px;
-    overflow: hidden;
-  }
-  .progress-bar {
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(90deg, #2039D4, #F5A800);
-    transform-origin: left;
-    transform: scaleX(1);
-  }
-  .progress-bar.run {
-    animation: shrink linear forwards;
-  }
-  @keyframes shrink {
-    from { transform: scaleX(1); }
-    to   { transform: scaleX(0); }
-  }
-
-  </style>
+#progress {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #2039D4, #F5A800);
+  transform-origin: left;
+}
+</style>
 </head>
 <body>
 
-<!-- Кнопка для тесту (в OBS вона мала і не заважає) -->
-
-
-<div class="alert" id="alert">
+<div id="alert">
   <div class="icon">💙</div>
   <div class="content">
-    <div class="top-row">
-      <span class="donor-name" id="donorName">Анонім</span>
-      <span class="amount" id="donorAmount">₴100</span>
+    <div class="row1">
+      <span id="donorName">Анонім</span>
+      <span id="donorAmount">₴100</span>
     </div>
-    <div class="message" id="donorMessage">Дякую за стрім!</div>
+    <div id="donorMessage">Дякую за стрім!</div>
   </div>
-  <div class="progress">
-    <div class="progress-bar" id="progressBar"></div>
+  <div class="progressbar">
+    <div id="progress"></div>
   </div>
 </div>
 
 <script>
-  // ====== КОНФІГ ======
-  const SERVER_URL = 'https://bunt-donate-production.up.railway.app'; // ← замінити після деплою
-  const DISPLAY_SECONDS = 7;
-  // ====================
+const SERVER = 'https://bunt-donate-production.up.railway.app';
+const DURATION = 7000;
 
-  let queue = [];
-  let isShowing = false;
+let queue = [];
+let busy = false;
 
-  function showDonation(data) {
-    queue.push(data);
-    if (!isShowing) processQueue();
-  }
+function show(data) {
+  queue.push(data);
+  if (!busy) next();
+}
 
-  function processQueue() {
-    if (queue.length === 0) { isShowing = false; return; }
-    isShowing = true;
+function next() {
+  if (!queue.length) { busy = false; return; }
+  busy = true;
 
-    const data = queue.shift();
-    const alert = document.getElementById('alert');
-    const bar = document.getElementById('progressBar');
+  const d = queue.shift();
+  const el = document.getElementById('alert');
+  const bar = document.getElementById('progress');
 
-    document.getElementById('donorName').textContent = data.name || 'Анонім';
-    document.getElementById('donorAmount').textContent = `₴${data.amount}`;
-    document.getElementById('donorMessage').textContent = data.message || '💙';
+  document.getElementById('donorName').textContent = d.name || 'Анонім';
+  document.getElementById('donorAmount').textContent = '₴' + d.amount;
+  document.getElementById('donorMessage').textContent = d.message || '💙';
 
-    // Показати
-    alert.classList.remove('hide');
-    alert.classList.add('show');
+  // Reset
+  el.className = '';
+  el.style.transform = 'translateY(200px)';
+  el.style.opacity = '0';
+  bar.style.transition = 'none';
+  bar.style.transform = 'scaleX(1)';
 
-    // Запустити прогрес-бар
-    bar.classList.remove('run');
-    bar.style.animationDuration = '';
-    void bar.offsetWidth; // reflow
-    bar.style.animationDuration = DISPLAY_SECONDS + 's';
-    bar.classList.add('run');
+  // Play sound
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
 
-    // Сховати
-    setTimeout(() => {
-      alert.classList.remove('show');
-      alert.classList.add('hide');
-      setTimeout(processQueue, 500);
-    }, DISPLAY_SECONDS * 1000);
-  }
+  // Show
+  void el.offsetWidth;
+  el.classList.add('show');
 
-  // Тест-функція — перевіряй прямо в OBS
-  function testAlert() {
-    showDonation({
-      name: 'Тестовий Донатер',
-      amount: 250,
-      message: 'Привіт з тесту! Все працює 🔥'
-    });
-  }
+  // Progress bar
+  setTimeout(() => {
+    bar.style.transition = 'transform ' + DURATION + 'ms linear';
+    bar.style.transform = 'scaleX(0)';
+  }, 100);
 
-  // SSE підключення до сервера
-  // (вмикається автоматично якщо SERVER_URL замінений)
-  function connectSSE() {
-    if (SERVER_URL.includes('YOUR-SERVER')) return; // пропустити якщо не налаштовано
+  // Hide
+  setTimeout(() => {
+    el.classList.remove('show');
+    el.classList.add('hide');
+    setTimeout(next, 500);
+  }, DURATION);
+}
 
-    const es = new EventSource(`${SERVER_URL}/events`);
-    es.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        if (data.type === 'donation') showDonation(data);
-      } catch(err) {}
-    };
-    es.onerror = () => {
-      es.close();
-      setTimeout(connectSSE, 3000);
-    };
-  }
+// SSE connection
+function connect() {
+  const es = new EventSource(SERVER + '/events');
+  es.onopen = () => console.log('SSE connected');
+  es.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.type === 'donation') show(d);
+    } catch(err) {}
+  };
+  es.onerror = () => {
+    es.close();
+    setTimeout(connect, 3000);
+  };
+}
 
-  connectSSE();
+connect();
 </script>
 </body>
 </html>
