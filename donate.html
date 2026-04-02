@@ -314,7 +314,7 @@
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = 'https://secure.wayforpay.com/pay';
-      form.target = '_blank';
+      form.target = '_self';
       Object.entries(data.fields).forEach(([key, val]) => {
         const input = document.createElement('input');
         input.type = 'hidden'; input.name = key; input.value = val;
@@ -322,11 +322,6 @@
       });
       document.body.appendChild(form);
       form.submit();
-      document.body.removeChild(form);
-      setTimeout(() => {
-        document.getElementById('formArea').style.display = 'none';
-        document.getElementById('successArea').classList.add('show');
-      }, 1500);
     } catch(e) { alert("Помилка з'єднання. Спробуй ще раз."); }
   }
 </script>
